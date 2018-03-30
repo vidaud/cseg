@@ -25,7 +25,8 @@ For help enter:
 ./cseg --help
 ```
 Some examples:/
-##training
+
+## training
 
 ```
 ./cseg -d/path/to/corpus/en -nen -atrain -etxt
@@ -34,7 +35,7 @@ This will look for files with extention txt in /path/to/corpus/en directory and 
 
 You can enable tokenization with ''-t'' option.
 
-##chunking
+## chunking
 ```
 ./cseg -d/path/to/corpus/en -m -cmajority -nen -aseg -etxt
 ```

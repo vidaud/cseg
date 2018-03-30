@@ -1,0 +1,27 @@
+name:                cseg
+version:             1.0.0.0
+synopsis:            Train and chunk texts with collocation segmentation.
+-- description:
+homepage:            http://textmining.lt
+license:             MIT
+license-file:        LICENSE
+author:              Vidas Daudaravicius
+maintainer:          vidas.daudaravicius@vtex.lt
+category:            NLP
+build-type:          Simple
+extra-source-files:  README.md
+cabal-version:       >=1.10
+
+executable cseg
+  main-is:             cseg.hs
+  build-depends:       base == 4.*
+                     , cmdargs
+                     , containers >= 0.5
+                     , directory >= 1.2
+                     , deepseq >= 1.3
+                     , monad-parallel >= 0.7
+                     , parallel >= 3.2
+
+
+  ghc-options:        -Wall -fno-warn-unused-do-bind -threaded -with-rtsopts="-N" -O2
+  default-language:   Haskell2010

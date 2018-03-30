@@ -19,3 +19,4 @@ Text chunking with collocation segmentation
 > ghc --make -threaded -rtsopts -with-rtsopts="-N" -O2 cseg.hs
 
 
+

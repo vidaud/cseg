@@ -1,8 +1,16 @@
 {-# LANGUAGE FlexibleInstances,FlexibleContexts, DeriveGeneric, DeriveAnyClass, BangPatterns, DeriveDataTypeable, ExistentialQuantification #-}
 
--- ghc --make -threaded -rtsopts -with-rtsopts="-N" -O2 cseg.hs 
--- ./cseg -d/home/vidas/acl2/corpus/split/en -m -nen -atrain -e".txt"
--- ./cseg -d/home/vidas/acl2/corpus/split/en -m -t -cmajority -nen -aseg -e".txt"
+{- |
+   Executable  : cseg
+   Copyright   : Copyright (C) 2010-2018 Vidas Daudaravicius
+   License     : MIT
+   Maintainer  : Vidas Daudaravicius <vidas.daudaravicius@vtex.lt>
+   Stability   : alpha
+   Portability : portable
+
+Text chunking with Collocation Segmentation.
+-}
+
 
 import Control.Monad
 import qualified Data.List as L

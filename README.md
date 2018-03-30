@@ -5,6 +5,7 @@ Text chunking with collocation segmentation
 [Haskell Platform](https://www.haskell.org) is on your system.
 
 > git clone git://github.com/vidaud/cseg.git
+
 > cd cseg
 
 ## with cabal
@@ -15,6 +16,7 @@ Text chunking with collocation segmentation
 ## compiling with ghc
 
 > cabal install cmdargs
+
 > ghc --make -threaded -rtsopts -with-rtsopts="-N" -O2 cseg.hs
 
 

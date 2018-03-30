@@ -3,8 +3,9 @@ module SentenceTex (tokenizeC,sentencesT) where
 import qualified Data.List as DL
 import Data.Char
 
+tokenizeC :: [Char] -> [[Char]]
 tokenizeC [] = []
-tokenizeC all@(x:xs)
+tokenizeC a@(x:xs)
          | isSpace x                     = tokenizeC xs
          | isSymbol x                    = [x]:tokenizeC xs
          | isAlpha x && ord x > 10000    = [x]:tokenizeC xs
@@ -13,60 +14,61 @@ tokenizeC all@(x:xs)
          | isPrint x                     = [x]:tokenizeC xs
          | otherwise                     = tokenizeC xs
          where 
-           (word,rem) = span (\c -> isAlpha c && ord c < 10001) all
-           (numb,rem2) = span (isDigit) all
+           (word,rem1) = span (\c -> isAlpha c && ord c < 10001) a
+           (_,rem2) = span (isDigit) a
            numb2 = "N"
-           (wordT,remT) = if length rem < 2
-                          then (word,rem)
-                          else if head rem == '-' || head rem == '—'
-                               then case span (\c -> (isAlpha c && ord c < 10001) || c == '-' || c == '—') rem of
-                                         ([],_) -> (word,rem)
+           (wordT,remT) = if length rem1 < 2
+                          then (word,rem1)
+                          else if head rem1 == '-' || head rem1 == '—'
+                               then case span (\c -> (isAlpha c && ord c < 10001) || c == '-' || c == '—') rem1 of
+                                         ([],_) -> (word,rem1)
                                          (wordX,remX) -> ((word++wordX),remX)
-                               else (word,rem)
+                               else (word,rem1)
                           
+sentencesT :: [Char] -> [Char]
 sentencesT [] = []
 sentencesT ('\t':'\t':xs) = sentencesT ('\t':xs)
 sentencesT ('\t':' ':xs) = sentencesT ('\t':xs)
 sentencesT (' ':'\t':xs) = sentencesT ('\t':xs)
 sentencesT ('\t':xs) = '\n' : sentencesT xs
-sentencesT (')':'.':' ':a@(x:xs))
+sentencesT (')':'.':' ':a@(x:_))
       | isDigit x                = ')' : '.' : ' ' : '\n':sentencesT a
       | isUpper x                = ')' : '.' : ' ' : '\n' : sentencesT a
       | isBeginEntiny a  = ')' : '.' : ' ' : '\n' : sentencesT a
       | otherwise                = ')' : sentencesT ('.' : ' ' :a)
-sentencesT (')':':':' ':a@(x:xs))
+sentencesT (')':':':' ':a)
       | isPrefixOfT "" beginSen a  = ')' : ':' : ' ' : '\n' : sentencesT a
       | otherwise                = ')' : sentencesT (':' : ' ' :a)
-sentencesT (']' : '.' : ' ' : a@(x : xs))
+sentencesT (']' : '.' : ' ' : a@(x : _))
       | isDigit x                = ']' : '.' : ' ' : '\n' : sentencesT a
       | isUpper x                = ']' : '.' : ' ' : '\n' : sentencesT a
       | isBeginEntiny a  = ']' : '.' : ' ' : '\n' : sentencesT a
       | otherwise                = ']': sentencesT ('.' : ' ' : a)
-sentencesT (']' : '?' : ' ' : a@(x : xs))
+sentencesT (']' : '?' : ' ' : a@(x : _))
       | isDigit x                = ']' : '?' : ' ' : '\n' : sentencesT a
       | isUpper x                = ']' : '?' : ' ' : '\n' : sentencesT a
       | isBeginEntiny a  = ']' : '?' : ' ' : '\n' : sentencesT a
       | otherwise                = ']': sentencesT ('?' : ' ' : a)
-sentencesT (']' : '!' : ' ' : a@(x : xs))
+sentencesT (']' : '!' : ' ' : a@(x : _))
       | isDigit x                = ']' : '!' : ' ' : '\n' : sentencesT a
       | isUpper x                = ']' : '!' : ' ' : '\n' : sentencesT a
       | isBeginEntiny a  = ']' : '!' : ' ' : '\n' : sentencesT a
       | otherwise                = ']': sentencesT ('!' : ' ' : a)
-sentencesT (']' : ' ' : a@(x : xs))
+sentencesT (']' : ' ' : a)
       | isBeginEntiny a  = ']' : ' ' : '\n' : sentencesT a
       | isPrefixOfT "" beginSen a = ']' : ' ' : '\n' : sentencesT a
       | otherwise                = ']': sentencesT (' ' : a)
-sentencesT ('\"' : '.' : ' ' : a@(x : xs))
+sentencesT ('\"' : '.' : ' ' : a@(x : _))
       | isDigit x                = '\"' : '.' : ' ' : '\n' : sentencesT a
       | isUpper x                = '\"' : '.' : ' ' : '\n' : sentencesT a
       | isBeginEntiny a  = '\"' : '.' : ' ' : '\n' : sentencesT a
       | otherwise                = '\"': sentencesT ('.' : ' ' : a)
-sentencesT ('\"' : '?' : ' ' : a@(x : xs))
+sentencesT ('\"' : '?' : ' ' : a@(x : _))
       | isDigit x                = '\"' : '?' : ' ' : '\n' : sentencesT a
       | isUpper x                = '\"' : '?' : ' ' : '\n' : sentencesT a
       | isBeginEntiny a  = '\"' : '?' : ' ' : '\n' : sentencesT a
       | otherwise                = '\"': sentencesT ('?' : ' ' : a)
-sentencesT ('\"' : '!' : ' ' : a@(x : xs))
+sentencesT ('\"' : '!' : ' ' : a@(x : _))
       | isDigit x                = '\"' : '!' : ' ' : '\n' : sentencesT a
       | isUpper x                = '\"' : '!' : ' ' : '\n' : sentencesT a
       | isBeginEntiny a  = '\"' : '!' : ' ' : '\n' : sentencesT a
@@ -79,7 +81,7 @@ sentencesT ('.' : '\"' : ' ' : a@(x : xs))
       | isLower x                = '.' : '\"' : ' ' : sentencesT a
       | isBeginEntiny a      = '.' : '\"' : ' ' : '\n' : sentencesT a
       | otherwise                = '.' : sentencesT ('\"' : ' ' : a)
-sentencesT ('.' : '\'' : '\'' : ' ' : a@(x : xs))
+sentencesT ('.' : '\'' : '\'' : ' ' : a@(x : _))
       | isDigit x                = '.' : '\'' : '\'' : ' ' : '\n' : sentencesT a
       | isUpper x                = '.' : '\'' : '\'' : ' ' : '\n' : sentencesT a
       | isLower x                = '.' : '\'' : '\'' : ' ' : sentencesT a
@@ -101,89 +103,89 @@ sentencesT ('!' : '\"' : ' ' : a@(x : xs))
       | isLower x                = '!' : '\"' : ' ' : sentencesT a
       | isBeginEntiny a      = '!' : '\"' : ' ' : '\n' : sentencesT a
       | otherwise                = '!' : sentencesT ('\"' : ' ' : a)
-sentencesT ('.' : '\'' : ' ' : a@(x : xs))
+sentencesT ('.' : '\'' : ' ' : a@(x : _))
       | isDigit x                = '.' : '\'' : ' ' : '\n' : sentencesT a
       | isUpper x                = '.' : '\'' : ' ' : '\n' : sentencesT a
       | isBeginEntiny a      = '.' : '\'' : ' ' : '\n' : sentencesT a
       | otherwise                = '.' : sentencesT ('\'' : ' ' : a)     -- '
-sentencesT ('?' : '\'' : ' ' : a@(x : xs))
+sentencesT ('?' : '\'' : ' ' : a@(x : _))
       | isDigit x                = '?' : '\'' : ' ' : '\n' : sentencesT a
       | isUpper x                = '?' : '\'' : ' ' : '\n' : sentencesT a
       | isBeginEntiny a      = '?' : '\'' : ' ' : '\n' : sentencesT a
       | otherwise                = '?' : sentencesT ('\'' : ' ' : a)     -- '
-sentencesT ('!' : '\'' : ' ' : a@(x : xs))
+sentencesT ('!' : '\'' : ' ' : a@(x : _))
       | isDigit x                = '!' : '\'' : ' ' : '\n' : sentencesT a
       | isUpper x                = '!' : '\'' : ' ' : '\n' : sentencesT a
       | isBeginEntiny a      = '!' : '\'' : ' ' : '\n' : sentencesT a
       | otherwise                = '!' : sentencesT ('\'' : ' ' : a)     -- '
-sentencesT ('.' : ')' : ' ' : a@(x : xs))
+sentencesT ('.' : ')' : ' ' : a@(x : _))
       | isDigit x                = '.' : ')' : ' ' : '\n' : sentencesT a
       | isUpper x                = '.' : ')' : ' ' : '\n' : sentencesT a
       | isLower x                = '.' : ')' : ' ' : sentencesT a
       | isBeginEntiny a  = '.' : ')' : ' ' : '\n' : sentencesT a
       | otherwise                = '.' : sentencesT (')' : ' ' : a)
-sentencesT ('?' : ')' : ' ' : a@(x : xs))
+sentencesT ('?' : ')' : ' ' : a@(x : _))
       | isDigit x                = '?' : ')' : ' ' : '\n' : sentencesT a
       | isUpper x                = '?' : ')' : ' ' : '\n' : sentencesT a
       | isLower x                = '?' : ')' : ' ' : sentencesT a
       | isBeginEntiny a  = '?' : ')' : ' ' : '\n' : sentencesT a
       | otherwise                = '?' : sentencesT (')' : ' ' : a)
-sentencesT ('!' : ')' : ' ' : a@(x : xs))
+sentencesT ('!' : ')' : ' ' : a@(x : _))
       | isDigit x                = '!' : ')' : ' ' : '\n' : sentencesT a
       | isUpper x                = '!' : ')' : ' ' : '\n' : sentencesT a
       | isLower x                = '!' : ')' : ' ' : sentencesT a
       | isBeginEntiny a  = '!' : ')' : ' ' : '\n' : sentencesT a
       | otherwise                = '!' : sentencesT (')' : ' ' : a)
-sentencesT ('.' : ']' : ' ' : a@(x : xs))
+sentencesT ('.' : ']' : ' ' : a@(x : _))
       | isDigit x                = '.' : ']' : ' ' : '\n' : sentencesT a
       | isUpper x                = '.' : ']' : ' ' : '\n' : sentencesT a
       | isBeginEntiny a  = '.' : ']' : ' ' : '\n' : sentencesT a
       | otherwise                = '.' : sentencesT (']' : ' ' : a)
-sentencesT ('?' : ']' : ' ' : a@(x : xs))
+sentencesT ('?' : ']' : ' ' : a@(x : _))
       | isDigit x                = '?' : ']' : ' ' : '\n' : sentencesT a
       | isUpper x                = '?' : ']' : ' ' : '\n' : sentencesT a
       | isBeginEntiny a  = '?' : ']' : ' ' : '\n' : sentencesT a
       | otherwise                = '?' : sentencesT (']' : ' ' : a)
-sentencesT ('!' : ']' : ' ' : a@(x : xs))
+sentencesT ('!' : ']' : ' ' : a@(x : _))
       | isDigit x                = '!' : ']' : ' ' : '\n' : sentencesT a
       | isUpper x                = '!' : ']' : ' ' : '\n' : sentencesT a
       | isBeginEntiny a  = '!' : ']' : ' ' : '\n' : sentencesT a
       | otherwise                = '!' : sentencesT (']' : ' ' : a)
-sentencesT ('.' : ' ' : '[' : a@(x : xs))
+sentencesT ('.' : ' ' : '[' : a@(x : _))
       | isDigit x                = '.' : ' ' : '\n' : '[' : sentencesT a
       | isUpper x                = '.' : ' ' : '\n' : '[' : sentencesT a
       | isBeginEntiny a  = '.' : ' ' : '\n' : '[' :  sentencesT a
       | otherwise                = '.' : sentencesT (' ' : '[' : a)
-sentencesT ('?' : ' ' : '[' : a@(x : xs))
+sentencesT ('?' : ' ' : '[' : a@(x : _))
       | isDigit x                = '?' : ' ' : '\n' : '[' : sentencesT a
       | isUpper x                = '?' : ' ' : '\n' : '[' : sentencesT a
       | isBeginEntiny a  = '?' : ' ' : '\n' : '[' :  sentencesT a
       | otherwise                = '?' : sentencesT (' ' : '[' : a)
-sentencesT ('!' : ' ' : '[' : a@(x : xs))
+sentencesT ('!' : ' ' : '[' : a@(x : _))
       | isDigit x                = '!' : ' ' : '\n' : '[' : sentencesT a
       | isUpper x                = '!' : ' ' : '\n' : '[' : sentencesT a
       | isBeginEntiny a  = '!' : ' ' : '\n' : '[' :  sentencesT a
       | otherwise                = '!' : sentencesT (' ' : '[' : a)
-sentencesT ('.' : ' ' : '(' : b : ')' : ' ' : a@(x:xs))    -- . (a) Note
+sentencesT ('.' : ' ' : '(' : b : ')' : ' ' : a@(x:_))    -- . (a) Note
       | isDigit x                = '.' : ' ' : '\n' : '(' : b : ')' : ' ' : sentencesT a 
       | isUpper x                = '.' : ' ' : '\n' : '(' : b : ')' : ' ' : sentencesT a
       | isBeginEntiny a          = '.' : ' ' : '\n' : '(' : b : ')' : ' ' : sentencesT a
       | (isNumT a) > 0           = '.' : ' ' : '\n' : '(' : b : ')' : ' ' : sentencesT a
       | otherwise                = '.' : ' ' : '(' : b : ')' : ' ' : sentencesT a
-sentencesT ('.' : ' ' : '(' : b : ')' : '-' : a@(x:xs))    -- . (a)-(b) Note
+sentencesT ('.' : ' ' : '(' : b : ')' : '-' : a)    -- . (a)-(b) Note
                                  = '.' : ' ' : '\n' : '(' : b : ')' : '-' : sentencesT a
-sentencesT ('.' : ' ' : '(' : a@(x:xs))    -- . (Note
+sentencesT ('.' : ' ' : '(' : a@(x:_))    -- . (Note
       | isDigit x                = '.' : ' ' : '\n' : '(' : sentencesT a 
       | isUpper x                = '.' : ' ' : '\n' : '(' : sentencesT a
       | isBeginEntiny a          = '.' : ' ' : '\n' : '(' : sentencesT a
       | (isNumT a) > 0           = '.' : ' ' : '\n' : '(' : sentencesT a
       | otherwise                = '.' : ' ' : '(' : sentencesT a
-sentencesT ('?' : ' ' : '(' : a@(x:xs))    -- . (Note
+sentencesT ('?' : ' ' : '(' : a@(x:_))    -- . (Note
       | isDigit x                = '?' : ' ' : '\n' : '(' : sentencesT a 
       | isUpper x                = '?' : ' ' : '\n' : '(' : sentencesT a
       | isBeginEntiny a  = '?' : ' ' : '\n' : '(' : sentencesT a
       | otherwise                = '?' : ' ' : '(' : sentencesT a
-sentencesT ('!' : ' ' : '(' : a@(x:xs))    -- . (Note
+sentencesT ('!' : ' ' : '(' : a@(x:_))    -- . (Note
       | isDigit x                = '!' : ' ' : '\n' : '(' : sentencesT a 
       | isUpper x                = '!' : ' ' : '\n' : '(' : sentencesT a
       | isBeginEntiny a  = '!' : ' ' : '\n' : '(' : sentencesT a
@@ -281,8 +283,8 @@ sentencesT xs
                                            else (isProbablyTitle) ++ ((sentencesT rm))
       | otherwise = i ++ (sentencesT j)
          where  
-              sh (' ':xs) = True
-              sh (xs) = False
+              sh (' ':_) = True
+              sh (_) = False
               isNextBegin = isPrefixOfT "" beginSen (dropWhile (==' ') rm)
               titleLen = isTitle xs titles
               abbrLen = isAbbr xs abbreviations
@@ -290,7 +292,7 @@ sentencesT xs
               numLen = isNum xs
               (num,rmNum) = splitAt numLen xs
               (isProbablyTitle,rm) = (\(n,ns) -> case ns of ('.':ms) -> ((n++"."), ms); _ -> (n,ns)) $ span (\x -> (isAlpha x) || (x == '-')) xs
-              (isProbablyTitle2,rmT) = (\(n,ns) -> case ns of ('.':ms) -> ((n++"."), ms); _ -> (n,ns)) $ span (\x -> (isAlpha x) || (x == '-')) $ dropWhile (== ' ') rm
+              (isProbablyTitle2) = (\(n,ns) -> case ns of ('.':_) -> ((n++".")); _ -> (n)) $ span (\x -> (isAlpha x) || (x == '-')) $ dropWhile (== ' ') rm
               (iT,jT) = span (isAlpha) xs
               (i,j) | null jT = (iT,jT)
                     | null iT = ([head jT] , tailS jT)
@@ -301,15 +303,19 @@ sentencesT xs
                                         then ((take 1 rm),(drop 1 rm))
                                         else ("",rm)
 
+tailS :: [Char] -> [Char]
 tailS [] = " "
-tailS (x:xs) = xs
+tailS (_:xs) = xs
 
-headSp (' ':xs) = True
-headSp xs = False
+headSp :: [Char] -> Bool
+headSp (' ':_) = True
+headSp _ = False
 
+headS :: [Char] -> Char
 headS [] = ' '
-headS (x:xs) = x
+headS (x:_) = x
 
+isTitleP :: [Char] -> Bool
 isTitleP [] = False
 isTitleP x
       | (isUpper $ headS x) 
@@ -318,22 +324,25 @@ isTitleP x
         && (isTitled $ init x) = True
       | otherwise = False
 
+isTitled :: [Char] -> Bool
 isTitled (x:xs) = (isUpper x) && (and (map (\n -> isLower n) xs))
 isTitled [] = False
 
 
-
+isUpperT :: [Char] -> Bool
 isUpperT [] = False
 isUpperT (x:xs)
       | isSp x  = isUp $ dropWhile (isSp) xs
       | otherwise = False
 
+isSp :: Char -> Bool
 isSp x = x == ' ' || x == '\"'
 
-isUp (x:xs) = isUpper x
+isUp :: [Char] -> Bool
+isUp (x:_) = isUpper x
 isUp [] = False
 
-
+beginSen :: [[Char]]
 beginSen = ["A"        ,"All"       ,"Almost"    ,"An"        ,"Another"   ,"Any"    ,"Both"     ,"Certain"
            ,"Different","Each"      ,"Either"    ,"Enough"    ,"Every"     ,"Few"    ,"Fewer"    ,"Fewest"  ,"He"
            ,"His"      ,"Her"       ,"How"       ,"If"        ,"It"        ,"Its"    ,"Last"     ,"Least"   ,"Less"
@@ -368,6 +377,7 @@ beginSen = ["A"        ,"All"       ,"Almost"    ,"An"        ,"Another"   ,"Any
            ,"mRNAs","mRNA","siRNAs","siRNA","RNA","mRNAs"
            ]
 
+names :: [[Char]]
 names = 
      ["Abigail"    ,"Abraham"    ,"Ada"    ,"Addison"    ,"Addys"    ,"Adelaide"    ,"Adele"    ,"Adie"    ,"Adrian"    ,"Agatha"    ,"Agnes"    ,"Aidan"    ,"Alaina"    ,"Alan"    ,"Alanna"    ,"Albert"    ,"Alberta"    ,"Alec"    ,"Alex"    ,"Alfred"    ,"Alice"    ,"Alison"    ,"Alma"    ,"Alvin"    ,"Alvina"    ,"Amanda"    ,"Amber"    ,"Amelia"    ,"Amory"    ,"Amy"    ,"Andrea"    ,"Andrew"    ,"Andy"    ,"Angel"    ,"Angela"    ,"Angie"    ,"Angus"    ,"Anna"    ,"Annabel"    ,"Archibald"    ,"Archie"    ,"Arda"    ,"Arlo"    ,"Arthur"    ,"Ashley"    ,"Ashton"    ,"Aubrey"    ,"Audrey"    ,"Augusta"    ,"Auley"    ,"Auliffe"    ,"Austen"    ,"Autumn"    ,"Ava"    ,"Avery"    ,"Avis"    ,"Awley"
     ,"Barbara"    ,"Barnabe"    ,"Barnes"    ,"Barry"    ,"Bartholomew"    ,"Basil"    ,"Beatrice"    ,"Belinda"    ,"Bella"    ,"Benedict"    ,"Berenice"    ,"Bernadine"    ,"Bert"    ,"Bertha"    ,"Bertram"    ,"Bessie"    ,"Bethany"    ,"Bette"    ,"Betty"    ,"Blair"    ,"Blanche"    ,"Braden"    ,"Bradley"    ,"Bramwell"    ,"Brandon"    ,"Breanna"    ,"Brenda"    ,"Brendan"    ,"Brennan"    ,"Bret"    ,"Brett"    ,"Brian"    ,"Briana"    ,"Brianne"    ,"Bridget"    ,"Brina"    ,"Britney"    ,"Bronwen"    ,"Brooklyn"    ,"Burdine"    ,"Byam"
@@ -389,8 +399,10 @@ names =
     ,"Wallis"    ,"Wanda"    ,"Warren"    ,"Wayne"    ,"Wendy"    ,"Whitney"    ,"Whittaker"    ,"Wilfred"    ,"Wilfried"    ,"William"    ,"Winifred"    ,"Winston"    ,"Woodrow"    ,"Yasmin"    ,"Yvette"    ,"Zadoc"    ,"Zelda"    ,"Zivar"    ,"Zuleika"
     ]
  
+isBeginEntiny :: [Char] -> Bool
 isBeginEntiny xs = or $ map (\x -> DL.isPrefixOf x xs) ["MATH","MATHDISP","CITE","REF"]
 
+isPrefixOfT :: String -> [String] -> String -> Bool
 isPrefixOfT end begin s
                | null end  && (elem x begin) = True
                | (DL.isPrefixOf end s) && (elem x begin) = True
@@ -398,6 +410,7 @@ isPrefixOfT end begin s
                 where
                     x = takeWhile (isAlphaNum) $ dropWhile (\c -> elem c spaces) $ drop (length end) s
 
+isPrefixOfN :: String -> [String] -> String -> Bool
 isPrefixOfN end begin s
                | null end  && not (null sp) && (elem x begin) = True
                | (DL.isPrefixOf end s) && not (null sp)  && (elem x begin) = True
@@ -411,11 +424,14 @@ titles = [ "Ref.", "Refs.","Mr.", "Mrs.", "Dr.", "St.", "Prof.","Ms.","Sr.","Phd
            "phd.","sect.","dr.", "st.", "prof.","ms.","ref.", "refs.","fig.", "figs.", "tab.", "tabs.", "sec.", "secs.","eq.","eqs.","eqn.","eqns.","Ex.","Rem.","Lem.","Prop.", 
            "Fig.", "Figure.", "Figs.", "Tab.", "Table.", "Tabs.", "Sec.", "Secs.","Eq.","Eqs.","D.C.","Smt.","U.S.","B.A.","Ann."]
 
+isName :: [Char] -> Bool
 isName x = elem name names
            where
                name = takeWhile (isAlpha) $ dropWhile (== ' ') x
 
-isTitle x [] = 0
+
+isTitle :: [Char] -> [[Char]] -> Int
+isTitle _ [] = 0
 isTitle x (a:as) = if DL.isPrefixOf a x then length a else isTitle x as
 
 
@@ -427,9 +443,11 @@ abbreviations = [ "d.", "p.", "pp.", "cf.", "c.f.", "ca.", "eg.", "ie.", "i.e.",
                   "univ.","assn.","bross.","col.","gen.","lt.","adm.","viz.","et al.","al.","ph.d.","phd.","b.sc.","bsc.","s.t.","resp.","vol.","c.c.s.","w.r.t.","w.r.t",
                   "trans.","apr.","proc.","info.","sep.","sept.","nov.","dec.","jun.","feb.","mar.","jul.","aug.","oct.","par.","ref.","refs.","eq.","eqs.","r.v.","a.k.a."]
 
-isAbbr x [] = 0
+isAbbr :: [Char] -> [[Char]] -> Int
+isAbbr _ [] = 0
 isAbbr x (a:as) = if (map (toLower) $ take (length a) x) == a then length a else isAbbr x as
 
+isNum :: [Char] -> Int
 isNum xx
        | null nums && null romanNums = 0
        | nums == "." = 0
@@ -439,9 +457,10 @@ isNum xx
        | otherwise = 0
             where 
               (sp,x) = span (==' ') xx
-              (nums,r) = span (\i -> isDigit i || elem i ".,") x
-              (romanNums,r2) = span (\i -> elem i ".,xviXVI") x
+              nums = takeWhile (\i -> isDigit i || elem i ".,") x
+              romanNums = takeWhile (\i -> elem i ".,xviXVI") x
 
+isNumT :: [Char] -> Int
 isNumT xx
        | null nums && null romanNums = 0
        | nums == "." = 0
@@ -451,6 +470,6 @@ isNumT xx
        | otherwise = 0
             where 
               (sp,x) = span (==' ') xx
-              (nums,r) = span (\i -> isDigit i || elem i ".,") x
-              (romanNums,r2) = span (\i -> elem i ".,xviXVI") x
+              nums = takeWhile (\i -> isDigit i || elem i ".,") x
+              romanNums = takeWhile (\i -> elem i ".,xviXVI") x
 

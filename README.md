@@ -4,18 +4,17 @@ Text chunking with collocation segmentation
 
 [Haskell Platform](https://www.haskell.org) is on your system.
 
-> git clone git://github.com/vidaud/cseg.git
+> git clone https://github.com/vidaud/cseg.git
 
 > cd cseg
 
-## with cabal
+> cabal configure
 
 > cabal install --only-dependencies
-> cabal buid
 
-## compiling with ghc
+> cabal build
 
-> cabal install cmdargs
+## recompiling with ghc
 
 > ghc --make -threaded -rtsopts -with-rtsopts="-N" -O2 cseg.hs
 
